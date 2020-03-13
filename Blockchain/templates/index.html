@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Blockchain Frontend</title>
+    <link rel="stylesheet" href="/static/vendor/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/static/vendor/DataTables/css/datatables.min.css">
+    <link rel="stylesheet" href="/static/vendor/font-awesome/font-awesome.min.css">
+    <link rel="stylesheet" href="/static/css/custom.css">
+</head>
+<body class="bg-dark">
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top" style="background-color: #222831;">
+        <div class="container">
+            <a href="#" class="navbar-brand">Blockchain Frontend</a>
+            <div class="collapse navbar-collapse">
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item active">
+                        <a href="/" class="nav-link">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="/configure" class="nav-link">Configure</a>
+                    </li>
+
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <br/>
+
+    <div class="row mx-md-n5">
+        <div class="col-sm-6 pl-4">
+            <div class="container alert text-light" style="background-color: #222831;">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-lg-12 text-center">
+                            <div class="card-body">
+                                <h4 class="card-title">Posts to be added to the next block</h4>
+                                <button type="submit" id="refresh_posts" class="btn btn-primary">
+                                    <i class="fa fa-refresh" aria-hidden="true"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="container">
+                    <div class="container">
+                        <ul class="list-unstyled" id="list-unmined">
+                        </ul>
+                    </div>
+
+                    <div class="col-lg-12 text-center">
+                        <input type="button" id="mine_button" class="btn btn-primary btn-lg" value="Mine">
+                    </div>
+                </div>
+            </div>
+
+            <div class="container alert text-light" style="background-color: #222831;">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-lg-12 text-center">
+                            <div class="card-body">
+                                <h4 class="card-title">Posts on the blockchain</h4>
+                                <button type="submit" id="refresh_blockchain" class="btn btn-primary">
+                                    <i class="fa fa-refresh" aria-hidden="true"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="container">
+                    <ul class="list-unstyled" id="list-mined">
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-6 pr-4">
+            <div class="container alert text-light" style="background-color: #222831;">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-lg-12 text-center">
+                            <div class="card-body">
+                                <h4 class="card-title">Transactions to be added to the next block</h4>
+                                <button type="submit" id="refresh_transaction" class="btn btn-primary">
+                                    <i class="fa fa-refresh" aria-hidden="true"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="container">
+                    <div class="container">
+                        <ul class="list-unstyled" id="list-unmined-transactions">
+                        </ul>
+                    </div>
+
+                    <div class="col-lg-12 text-center">
+                        <input type="button" id="mine_transactions_button" class="btn btn-primary btn-lg" value="Mine">
+                    </div>
+                </div>
+            </div>
+
+            <div class="container alert text-light" style="background-color: #222831;">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-lg-12 text-center">
+                            <div class="card-body">
+                                <h4 class="card-title">Transactions on the blockchain</h4>
+                                <button type="submit" id="refresh_transactions_blockchain" class="btn btn-primary">
+                                    <i class="fa fa-refresh" aria-hidden="true"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="container">
+                    <ul class="list-unstyled" id="list-mined-transactions">
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script src="/static/vendor/jquery/jquery.min.js"></script>
+    <script src="/static/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="/static/vendor/bootstrap/js/bootstrap.min.js"></script>
+    <script src="/static/vendor/DataTables/js/datatables.min.js"></script>
+    <script src="/static/vendor/DataTables/js/ellipsis.js"></script>
+    <script>
+        $(function(){
+            $.ajax({
+                url: "/posts_chain",
+                type: "GET",
+                success: function(response){
+                    if(response['length'] > 0){
+                         $('#no_mine_post').modal("hide");
+                    }
+                    for (i=response['posts_chain_length']-1;i>=0;i--){
+                        for (j=0;j<response['posts_chain'][i]['posts'].length;j++){
+                            let options = {year: "numeric", month: "short", day:"numeric", hour: "2-digit", minute: "2-digit", second: "2-digit",}
+                            let date = new Date(response['posts_chain'][i]['timestamp']*1000);
+                            formattedTimestamp = date.toLocaleTimeString('en-US', options);
+                            $('#list-mined').append("<li><div class='container alert text-light' style='background-color: #393e46;'><div class='row'>"
+                                                    + "<label class='col-sm-1'>Block: "
+                                                    + response['posts_chain'][i]['block_number']
+                                                    + "</label><label class='col-sm-1'>Post: "
+                                                    + j+1
+                                                    + "</label><label class='col-sm-4'>Date/Time: "
+                                                    + formattedTimestamp + "</label><div class='col-sm-6'><textarea rows='1' "
+                                                    + "class='form-control' disabled>"
+                                                    + response['posts_chain'][i]['posts'][j]['user_public_key']
+                                                    + "</textarea></div></div><br/><div class='row'>"
+                                                    + "<label class='col-sm-2'>Head: </label><div class='col-sm-10'>"
+                                                    + "<textarea class='form-control' rows='1' disabled>"
+                                                    + response['posts_chain'][i]['posts'][j]['head']
+                                                    + "</textarea></div></div><br/><div class='row'>"
+                                                    + "<label class='col-sm-2'>Content: </label><div class='col-sm-10'>"
+                                                    + "<textarea class='form-control' disabled>"
+                                                    + response['posts_chain'][i]['posts'][j]['content']
+                                                    + "</textarea></div></div></div></li><br/>");
+                        }
+                    }
+                 },
+                error: function(error){
+                    console.log(error);
+                }
+            });
+
+
+            $.ajax({
+                url: "/posts/get",
+                type: "GET",
+                success: function(response){
+                    if(response['posts'].length > 0){
+                         $('#no_unmine_post').modal("hide");
+                    }
+                    for (i=0;i<response['posts'].length;i++){
+                        $('#list-unmined').append("<li><div class='container alert text-light' style='background-color: #393e46;'>"
+                                                    + "<div class='row'><label class='col-sm-2'>User Public Key: "
+                                                    + "</label><div class='col-sm-10'><textarea rows='1' "
+                                                    + "class='form-control' disabled>"
+                                                    + response['posts'][i]['user_public_key']
+                                                    + "</textarea></div></div><br/><div class='row'>"
+                                                    + "<label class='col-sm-2'>Head: </label><div class='col-sm-10'>"
+                                                    + "<textarea class='form-control' rows='1' disabled>"
+                                                    + response['posts'][i]['head']
+                                                    + "</textarea></div></div><br/><div class='row'>"
+                                                    + "<label class='col-sm-2'>Content: </label><div class='col-sm-10'>"
+                                                    + "<textarea class='form-control' disabled>"
+                                                    + response['posts'][i]['content']
+                                                    + "</textarea></div><br/></div></li><br/>");
+
+                    }
+                 },
+                error: function(error){
+                    console.log(error);
+                }
+            });
+
+            $.ajax({
+                url: "/transaction_chain",
+                type: "GET",
+                success: function(response){
+
+                    if(response['transactions_chain_length'] > 0){
+                         $('#no_mine_post').modal("hide");
+                    }
+                    for (i=response['transactions_chain_length']-1;i>=0;i--){
+                        for (j=0;j<response['transactions_chain'][i]['transactions'].length;j++){
+                            let options = {year: "numeric", month: "short", day:"numeric", hour: "2-digit", minute: "2-digit", second: "2-digit",}
+                            let date = new Date(response['transactions_chain'][i]['timestamp']*1000);
+                            formattedTimestamp = date.toLocaleTimeString('en-US', options);
+                            $('#list-mined-transactions').append("<li><div class='container alert text-light' style='background-color: #393e46;'><div class='row'>"
+                                                    + "<label class='col-sm-2'>Block: "
+                                                    + response['transactions_chain'][i]['block_number']
+                                                    + "</label><label class='col-sm-2'>Post: "
+                                                    + j+1
+                                                    + "</label><label class='col-sm-6'>Date/Time: "
+                                                    + formattedTimestamp + "</label></div><br/><div class='row'>"
+                                                    + "<label class='col-sm-2'>S P Key: </label><div class='col-sm-10'>"
+                                                    + "<textarea class='form-control' rows='1' disabled>"
+                                                    + response['transactions_chain'][i]['transactions'][j]['sender_public_key']
+                                                    + "</textarea></div></div><br/><div class='row'>"
+                                                    + "<label class='col-sm-2'>R P Key: </label><div class='col-sm-10'>"
+                                                    + "<textarea class='form-control' rows='1' disabled>"
+                                                    + response['transactions_chain'][i]['transactions'][j]['recipient_public_key']
+                                                    + "</textarea></div></div><br/><div class='row'>"
+                                                    + "<label class='col-sm-2'>Amount: </label><div class='col-sm-10'>"
+                                                    + "<textarea class='form-control' rows='1' disabled>"
+                                                    + response['transactions_chain'][i]['transactions'][j]['amount']
+                                                    + "</textarea></div></div></div></li><br/>");
+                        }
+                    }
+                 },
+                error: function(error){
+                    console.log(error);
+                }
+            });
+
+
+            $.ajax({
+                url: "/transactions/get",
+                type: "GET",
+                success: function(response){
+                    if(response['transactions'].length > 0){
+                         $('#no_unmine_post').modal("hide");
+                    }
+                    for (i=0;i<response['transactions'].length;i++){
+                        $('#list-unmined-transactions').append("<li><div class='container alert text-light' style='background-color: #393e46;'>"
+                                                    + "<div class='row'><label class='col-sm-2'>S P Key: "
+                                                    + "</label><div class='col-sm-10'><textarea rows='1' "
+                                                    + "class='form-control' disabled>"
+                                                    + response['transactions'][i]['sender_public_key']
+                                                    + "</textarea></div></div><br/><div class='row'>"
+                                                    + "<label class='col-sm-2'>R P Key: </label><div class='col-sm-10'>"
+                                                    + "<textarea class='form-control' rows='1' disabled>"
+                                                    + response['transactions'][i]['recipient_public_key']
+                                                    + "</textarea></div></div><br/><div class='row'>"
+                                                    + "<label class='col-sm-2'>Amount: </label><div class='col-sm-10'>"
+                                                    + "<textarea class='form-control' rows='1' disabled>"
+                                                    + response['transactions'][i]['amount']
+                                                    + "</textarea></div><br/></div></li><br/>");
+
+                    }
+                 },
+                error: function(error){
+                    console.log(error);
+                }
+            });
+
+            $("#mine_button").click(function(){
+                $.ajax({
+                    url: "/post/mine",
+                    type: "GET",
+                    success: function(response){
+                        window.location.reload();
+                    },
+                    error: function(error){
+                        console.log(error);
+                    }
+                });
+            });
+
+            $("#mine_transactions_button").click(function(){
+                $.ajax({
+                    url: "/transaction/mine",
+                    type: "GET",
+                    success: function(response){
+                        window.location.reload();
+                    },
+                    error: function(error){
+                        console.log(error);
+                    }
+                });
+            });
+
+            $('#refresh_posts').click(function(){
+                window.location.reload();
+            });
+            $('#refresh_transaction').click(function(){
+                window.location.reload();
+            });
+
+            $('#refresh_blockchain').click(function(){
+                $.ajax({
+                    url: "/nodes/resolve",
+                    type: "GET",
+                    success: function(response){
+                        window.location.reload();
+                    },
+                    error: function(error){
+                        console.log(error);
+                    }
+                });
+            });
+
+            $('#refresh_transactions_blockchain').click(function(){
+                $.ajax({
+                    url: "/nodes/resolve",
+                    type: "GET",
+                    success: function(response){
+                        window.location.reload();
+                    },
+                    error: function(error){
+                        console.log(error);
+                    }
+                });
+            });
+
+        });
+    </script>
+</body>
+</html>

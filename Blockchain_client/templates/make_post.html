@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Blockchain Client</title>
+    <link rel="stylesheet" href="/static/vendor/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/static/vendor/DataTables/css/datatables.min.css">
+    <link rel="stylesheet" href="/static/vendor/font-awesome/font-awesome.min.css">
+    <link rel="stylesheet" href="/static/css/custom.css">
+</head>
+<body class="bg-dark">
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top" style="background-color: #222831;">
+        <div class="container">
+            <a href="#" class="navbar-brand">Blockchain Client</a>
+            <div class="collapse navbar-collapse">
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item">
+                        <a href="/" class="nav-link">Account Generator</a>
+                    </li>
+                    <li class="nav-item active">
+                        <a href="/make/post" class="nav-link">Create Post</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="/view/posts" class="nav-link">View Posts</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="/view/transaction" class="nav-link">View Transactions</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <br/>
+    <div class="container alert text-light" style="background-color: #222831;">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12 text-center">
+                    <div class="card-body">
+                        <h4 class="card-title">Create Post:</h4>
+                        <p class="card-text">Enter Post details and click on "Create Post" button to create your post.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <form id="post_form">
+            <div class="row">
+                <label class="col-sm-2">User Public Key:</label>
+                <div class="col-sm-10">
+                    <input type="text" name="user_public_key" id="user_public_key" class="form-control">
+                </div>
+            </div>
+
+            <br/>
+
+            <div class="row">
+                <label class="col-sm-2">User Private Key:</label>
+                <div class="col-sm-10">
+                    <input type="text" name="user_private_key" id="user_private_key" class="form-control">
+                </div>
+            </div>
+
+            <br/>
+
+            <div class="row">
+                <label class="col-sm-2">Head:</label>
+                <div class="col-sm-10">
+                    <textarea name="head" rows="1" id="head" class="form-control"></textarea>
+                </div>
+            </div>
+
+            <br/>
+
+            <div class="row">
+                <label class="col-sm-2">Content:</label>
+                <div class="col-sm-10">
+                    <textarea name="content" rows="2" id="content" class="form-control"></textarea>
+                </div>
+            </div>
+
+            <br/>
+
+            <div class="row">
+                <div class="col-sm-12 text-center">
+                    <input type="button" name="create_post" id="create_post" class="btn btn-primary btn-lg" value="Create Post">
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <div class="modal modal-alert fade" id="basic_modal" tabindex="-1" role="dialog" aria-labelledby="basicModal" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content text-light bg-dark">
+                <div class="modal-header">
+                    <div class="modal-title col-md-12">Confirm post details, enter a blockchain node url and click on "Confirm Details" to finalize your post</div>
+                    <button type="button" class="close-md-2" data-dismiss="modal" aria-hidden="true">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <form id="confirmation_post_form">
+                        <div class="row">
+                            <label class="col-sm-12">User Public Keys:</label>
+                            <div class="col-sm-12">
+                                <input type="text" name="confirmation_user_public_key" id="confirmation_user_public_key" rows="2" class="form-control" readonly>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <label class="col-sm-12">Head to Post:</label>
+                            <div class="col-sm-12">
+                                <input type="text" name="confirmation_head" id="confirmation_head" rows="2" class="form-control" readonly>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <label class="col-sm-12">Content to Post:</label>
+                            <div class="col-sm-12">
+                                <input type="text" name="confirmation_content" id="confirmation_content" rows="2" class="form-control" readonly>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <label class="col-sm-12">Post Signature:</label>
+                            <div class="col-sm-12">
+                                <input type="text" name="post_signature" id="post_signature" rows="2" class="form-control" readonly>
+                            </div>
+                        </div>
+                    </form>
+
+                    <div class="row">
+                        <label class="col-sm-12">Blockchain Node URL:</label>
+                        <div class="col-sm-12">
+                            <input type="text" name="node_url" id="node_url" rows="2" class="form-control" value="http://127.0.0.1:5001">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" data-dismiss="modal">Cancel</button>
+                    <button type="button" id="button_confirmation_post" class="btn btn-success" data-dismiss="modal">Confirm Details</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal modal-alert fade" id="success_post_modal" tabindex="-1" role="dialog" aria-labelledby="basicModal" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content text-light bg-dark">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-success" role="alert">
+                        <h4 class="alert-heading">Successfully Posted!</h4>
+                        <p>You successfully posted your post. It will be added to the next block.</p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" id="button_confirmation_post1" class="btn btn-success" data-dismiss="modal">OK</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script src="/static/vendor/jquery/jquery.min.js"></script>
+    <script src="/static/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="/static/vendor/DataTables/js/datatables.min.js"></script>
+    <script src="/static/vendor/DataTables/js/ellipsis.js"></script>
+    <script>
+        $(function(){
+            $("#create_post").click(function(){
+                $.ajax({
+                    url: "/create/post",
+                    type: "POST",
+                    dataType: "json",
+                    data: $('#post_form').serialize(),
+                    success: function(response){
+                        document.getElementById('confirmation_user_public_key').value = response['post']['user_public_key'];
+                        document.getElementById('confirmation_head').value = response['post']['head'];
+                        document.getElementById('confirmation_content').value = response['post']['content'];
+                        document.getElementById('post_signature').value = response['signature'];
+                        $('#basic_modal').modal('show');
+                    },
+                    error: function(error){
+                        console.log(error);
+                    }
+                });
+            });
+            $("#button_confirmation_post").click(function(){
+                $.ajax({
+                    url: document.getElementById('node_url').value + "/post/new",
+                    type: 'POST',
+                    dataType: 'json',
+                    header: {'Access-Control-Allow-Origin': '*'},
+                    data: $('#confirmation_post_form').serialize(),
+                    success: function(response){
+                        $('#user_public_key').val('');
+                        $('#user_private_key').val('');
+                        $('#head').val('');
+                        $('#content').val('');
+                        $('#basic_modal').modal('hide');
+                        $('#success_post_modal').modal('show');
+                    },
+                    error: function(error){
+                        console.log(error);
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

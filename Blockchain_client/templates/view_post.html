@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Blockchain Client</title>
+    <link rel="stylesheet" href="/static/vendor/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/static/vendor/DataTables/css/datatables.min.css">
+    <link rel="stylesheet" href="/static/vendor/font-awesome/font-awesome.min.css">
+    <link rel="stylesheet" href="/static/css/custom.css">
+</head>
+<body class="bg-dark">
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top" style="background-color: #222831;">
+        <div class="container">
+            <a href="#" class="navbar-brand">Blockchain Client</a>
+            <div class="collapse navbar-collapse">
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item">
+                        <a href="/" class="nav-link">Account Generator</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="/make/post" class="nav-link">Create Post</a>
+                    </li>
+                    <li class="nav-item active">
+                        <a href="/view/posts" class="nav-link">View Posts</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="/view/transaction" class="nav-link">View Transactions</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <br/>
+
+    <div class='container alert text-light' style='background-color: #393e46;'>
+        <div class='row'>
+            <label class='col-sm-2'>User Public Key: </label>
+            <div class='col-sm-10'>
+                <textarea rows='1' class='form-control' id="owners_public_key" disabled>{{data.user_public_key}}</textarea>
+            </div>
+        </div>
+
+        <br/>
+
+        <div class='row'>
+            <label class='col-sm-2'>Head: </label>
+            <div class='col-sm-10'>
+                <textarea class='form-control' rows='1' disabled>{{data.head}}</textarea>
+            </div>
+        </div>
+
+        <br/>
+
+        <div class='row'>
+            <label class='col-sm-2'>Content: </label>
+            <div class='col-sm-10'>
+                <textarea class='form-control' disabled>{{data.content}}</textarea>
+            </div>
+        </div>
+
+        <br/>
+
+        <div class='row'>
+            <div class='col-sm-10'>
+                <input type='button' id="donate" class='btn btn-primary' value='Donate'>
+            </div>
+        </div>
+
+    </div>
+
+
+     <div class="modal modal-alert fade" id="donate_modal" tabindex="-1" role="dialog" aria-labelledby="basicModal" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content text-light bg-dark">
+                <div class="modal-header">
+                    <div class="modal-title col-md-12">Enter transaction details and click on "Donate" to donate</div>
+                    <button type="button" class="close-md-2" data-dismiss="modal" aria-hidden="true">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <form id="donate_post_form">
+                        <div class="row">
+                            <label class="col-sm-12">User Public Keys:</label>
+                            <div class="col-sm-12">
+                                <input type="text" name="sender_public_key" id="sender_public_key" rows="2" class="form-control">
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <label class="col-sm-12">User Private Keys:</label>
+                            <div class="col-sm-12">
+                                <input type="text" name="sender_private_key" id="sender_private_key" rows="2" class="form-control">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <label class="col-sm-12">Recipient Public Key:</label>
+                            <div class="col-sm-12">
+                                <input type="text" name="recipient_public_key" id="recipient_public_key" rows="2" class="form-control" readonly>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <label class="col-sm-12">Amount:</label>
+                            <div class="col-sm-12">
+                                <input type="text" name="amount" id="amount" rows="2" class="form-control" >
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" data-dismiss="modal">Cancel</button>
+                    <button type="button" id="button_donate" class="btn btn-success" data-dismiss="modal">Donate</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="modal modal-alert fade" id="donate_confirmation_modal" tabindex="-1" role="dialog" aria-labelledby="basicModal" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content text-light bg-dark">
+                <div class="modal-header">
+                    <div class="modal-title col-md-12">Confirm transaction details, enter a blockchain node url and click on "Confirm Details" to finalize your transaction</div>
+                    <button type="button" class="close-md-2" data-dismiss="modal" aria-hidden="true">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <form id="confirmation_transaction_form">
+                        <div class="row">
+                            <label class="col-sm-12">Sender Public Keys:</label>
+                            <div class="col-sm-12">
+                                <input type="text" name="confirmation_sender_public_key" id="confirmation_sender_public_key" rows="2" class="form-control" readonly>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <label class="col-sm-12">Recipient Public Keys:</label>
+                            <div class="col-sm-12">
+                                <input type="text" name="confirmation_recipient_public_key" id="confirmation_recipient_public_key" rows="2" class="form-control" readonly>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <label class="col-sm-12">Amount to Send:</label>
+                            <div class="col-sm-12">
+                                <input type="text" name="confirmation_amount" id="confirmation_amount" rows="2" class="form-control" readonly>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <label class="col-sm-12">Transaction Signature:</label>
+                            <div class="col-sm-12">
+                                <input type="text" name="transaction_signature" id="transaction_signature" rows="2" class="form-control" readonly>
+                            </div>
+                        </div>
+                    </form>
+                    <div class="row">
+                        <label class="col-sm-12">Blockchain Node URL:</label>
+                        <div class="col-sm-12">
+                            <input type="text" name="node_url" id="node_url" rows="2" class="form-control" value="http://127.0.0.1:5001">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" data-dismiss="modal">Cancel</button>
+                    <button type="button" id="button_confirmation_transaction" class="btn btn-success" data-dismiss="modal">Confirm Details</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal modal-alert fade" id="success_transection_modal" tabindex="-1" role="dialog" aria-labelledby="basicModal" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content text-light bg-dark">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-success" role="alert">
+                        <h4 class="alert-heading">Successful Transaction!</h4>
+                        <p>You successfully completed your transaction. It will be added to the next block.</p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" id="button_confirmation_transaction1" class="btn btn-success" data-dismiss="modal">OK</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script src="/static/vendor/jquery/jquery.min.js"></script>
+    <script src="/static/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="/static/vendor/DataTables/js/datatables.min.js"></script>
+    <script src="/static/vendor/DataTables/js/ellipsis.js"></script>
+    <script>
+        $(function(){
+            $("#donate").click(function(){
+                $('#donate_modal').modal('show');
+                document.getElementById('recipient_public_key').value = document.getElementById('owners_public_key').value;
+            });
+            $("#button_donate").click(function(){
+                $.ajax({
+                    url: "/generate/transaction",
+                    type: "POST",
+                    dataType: "json",
+                    data: $('#donate_post_form').serialize(),
+                    success: function(response){
+                        document.getElementById('confirmation_sender_public_key').value = response['transaction']['sender_public_key'];
+                        document.getElementById('confirmation_recipient_public_key').value = response['transaction']['recipient_public_key'];
+                        document.getElementById('confirmation_amount').value = response['transaction']['amount'];
+                        document.getElementById('transaction_signature').value = response['signature'];
+                        $('#donate_confirmation_modal').modal('show');
+                    },
+                    error: function(error){
+                        console.log(error);
+                    }
+                });
+            });
+            $("#button_confirmation_transaction").click(function(){
+                $.ajax({
+                    url: document.getElementById('node_url').value + "/transactions/new",
+                    type: 'POST',
+                    dataType: 'json',
+                    header: {'Access-Control-Allow-Origin': '*'},
+                    data: $('#confirmation_transaction_form').serialize(),
+                    success: function(response){
+                        $('#sender_public_key').val('');
+                        $('#sender_private_key').val('');
+                        $('#recipient_public_key').val('');
+                        $('#amount').val('');
+                        $('#basic_modal').modal('hide');
+                        $('#success_transection_modal').modal('show');
+                    },
+                    error: function(error){
+                        console.log(error);
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
