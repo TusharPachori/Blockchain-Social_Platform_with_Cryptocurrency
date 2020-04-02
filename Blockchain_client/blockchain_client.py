@@ -19,18 +19,18 @@ class Post:
         self.head = head
         self.content = content
 
+    def sign_post(self):
+        private_key = RSA.importKey(binascii.unhexlify(self.user_private_key))
+        signer = PKCS1_v1_5.new(private_key)
+        hash = SHA.new(str(self.to_dict()).encode('utf8'))
+        return binascii.hexlify(signer.sign(hash)).decode('ascii')
+
     def to_dict(self):
         return OrderedDict({
             'user_public_key': self.user_public_key,
             'head': self.head,
             'content': self.content,
         })
-
-    def sign_post(self):
-        private_key = RSA.importKey(binascii.unhexlify(self.user_private_key))
-        signer = PKCS1_v1_5.new(private_key)
-        hash = SHA.new(str(self.to_dict()).encode('utf8'))
-        return binascii.hexlify(signer.sign(hash)).decode('ascii')
 
 
 class Transaction:
@@ -41,18 +41,18 @@ class Transaction:
         self.recipient_public_key = recipient_public_key
         self.amount = amount
 
+    def sign_transection(self):
+        private_key = RSA.importKey(binascii.unhexlify(self.sender_private_key))
+        signer = PKCS1_v1_5.new(private_key)
+        hash = SHA.new(str(self.to_dict()).encode('utf8'))
+        return binascii.hexlify(signer.sign(hash)).decode('ascii')
+
     def to_dict(self):
         return OrderedDict({
             'sender_public_key': self.sender_public_key,
             'recipient_public_key': self.recipient_public_key,
             'amount': self.amount,
         })
-
-    def sign_transection(self):
-        private_key = RSA.importKey(binascii.unhexlify(self.sender_private_key))
-        signer = PKCS1_v1_5.new(private_key)
-        hash = SHA.new(str(self.to_dict()).encode('utf8'))
-        return binascii.hexlify(signer.sign(hash)).decode('ascii')
 
 
 app = Flask(__name__)

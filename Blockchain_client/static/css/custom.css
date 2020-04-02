@@ -2,3 +2,9 @@ body {
 	padding-top: 54px;
     background-color:#cccccc;
 }
+#create_post{
+    white-space: pre-wrap;
+}
+#post_content{
+    white-space: pre-wrap;
+}

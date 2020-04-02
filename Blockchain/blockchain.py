@@ -16,7 +16,9 @@ from urllib.parse import urlparse
 
 MINING_DIFFICULTY = 2
 MINING_REWARD = 1
+POSTING_REWARD = 0.5
 MINIG_SENDER = "The Blockchain"
+POSTING_SENDER = "The Blockchain"
 
 
 class Blockchain:
@@ -107,21 +109,16 @@ class Blockchain:
         new_posts_chain = None
         new_transactions_chain = None
         max_posts_length = len(self.posts_chain)
-        max_transactions_length = len(self.transactions_chain)
         for node in neighbours:
             response = requests.get("http://" + node + "/chain")
             if response.status_code == 200:
                 posts_chain_length = response.json()['posts_chain_length']
                 posts_chain = response.json()['posts_chain']
-                transactions_chain_length = response.json()['transactions_chain_length']
                 transactions_chain = response.json()['transactions_chain']
                 if posts_chain_length > max_posts_length and self.valid__posts_chain(posts_chain):
                     max_posts_length = posts_chain_length
                     new_posts_chain = posts_chain
-                if transactions_chain_length > max_transactions_length and self.valid__posts_chain(transactions_chain):
-                    max_transactions_length = transactions_chain_length
                     new_transactions_chain = transactions_chain
-        check1 = check2 = None
         if new_posts_chain:
             valid_index = 0
             while True:
@@ -135,22 +132,7 @@ class Blockchain:
                         self.posts.append(post)
                     valid_index+=1
             self.posts_chain = new_posts_chain
-            check1=1
-
-        if new_transactions_chain:
-            valid_index = 0
-            while True:
-                if valid_index == len(self.transactions_chain) or self.transactions_chain[valid_index]['previous_hash'] != new_transactions_chain[valid_index]['previous_hash']:
-                    break
-                valid_index+=1
-            if valid_index!=len(new_transactions_chain)-1 and valid_index != len(self.transactions_chain):
-                while valid_index!=len(self.transactions_chain):
-                    for transaction in self.transactions_chain[valid_index]['transactions']:
-                        self.transactions.append(transaction)
-                    valid_index+=1
             self.transactions_chain = new_transactions_chain
-            check2 = 1
-        if check1 or check2:
             return True
         return False
 
@@ -194,6 +176,10 @@ class Blockchain:
             'content': content,})
         signature_verification = self.verify_signature(user_public_key, signature, post)
         if signature_verification:
+            blockchain.submit_transaction(sender_public_key=POSTING_SENDER,
+                                          recipient_public_key=user_public_key,
+                                          signature="",
+                                          amount=POSTING_REWARD)
             self.posts.append(post)
             return len(self.posts_chain) + 1
         else:
@@ -278,6 +264,10 @@ def get_transactions_chain():
 @app.route('/post/mine', methods=['GET'])
 def post_chain_mine():
     nonce = blockchain.posts_proof_of_work()
+    blockchain.submit_transaction(sender_public_key=MINIG_SENDER,
+                                  recipient_public_key=blockchain.node_id,
+                                  signature="",
+                                  amount=MINING_REWARD)
     last_block = blockchain.posts_chain[-1]
     previous_hash = blockchain.hash(last_block)
     block = blockchain.create_posts_block(nonce, previous_hash)
